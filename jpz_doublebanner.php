@@ -3,6 +3,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+use Symfony\Component\HttpFoundation\Request;
+
 class Jpz_DoubleBanner extends Module
 {
     protected $config_form = false;
@@ -15,11 +17,13 @@ class Jpz_DoubleBanner extends Module
     public const B1_IMAGE = self::CONFIG_PREFIX . 'B1_IMAGE';
     public const B1_TEXT = self::CONFIG_PREFIX . 'B1_TEXT';
     public const B1_CATEGORY = self::CONFIG_PREFIX . 'B1_CATEGORY';
+    public const B1_QUERY_PARAMS = self::CONFIG_PREFIX . 'B1_QUERY_PARAMS';
 
     // Config keys for Banner 2
     public const B2_IMAGE = self::CONFIG_PREFIX . 'B2_IMAGE';
     public const B2_TEXT = self::CONFIG_PREFIX . 'B2_TEXT';
     public const B2_CATEGORY = self::CONFIG_PREFIX . 'B2_CATEGORY';
+    public const B2_QUERY_PARAMS = self::CONFIG_PREFIX . 'B2_QUERY_PARAMS';
 
 
     public function __construct()
@@ -72,10 +76,12 @@ class Jpz_DoubleBanner extends Module
         Configuration::updateValue(self::B1_IMAGE, '');
         Configuration::updateValue(self::B1_TEXT, $default_text_values, true);
         Configuration::updateValue(self::B1_CATEGORY, 0);
+        Configuration::updateValue(self::B1_QUERY_PARAMS, 0);
 
         Configuration::updateValue(self::B2_IMAGE, '');
         Configuration::updateValue(self::B2_TEXT, $default_text_values, true);
         Configuration::updateValue(self::B2_CATEGORY, 0);
+        Configuration::updateValue(self::B2_QUERY_PARAMS, 0);
 
         return true;
     }
@@ -85,9 +91,11 @@ class Jpz_DoubleBanner extends Module
         Configuration::deleteByName(self::B1_IMAGE);
         Configuration::deleteByName(self::B1_TEXT);
         Configuration::deleteByName(self::B1_CATEGORY);
+        Configuration::deleteByName(self::B1_QUERY_PARAMS);
         Configuration::deleteByName(self::B2_IMAGE);
         Configuration::deleteByName(self::B2_TEXT);
         Configuration::deleteByName(self::B2_CATEGORY);
+        Configuration::deleteByName(self::B2_QUERY_PARAMS);
 
         // Opzionale: cancellare le immagini caricate e la cartella uploads
         // $files = glob($this->upload_dir_path . '*');
@@ -212,6 +220,14 @@ class Jpz_DoubleBanner extends Module
                             ]
                         ],
                     ],
+                    [
+                        'type' => 'text',
+                        'label' => $this->trans('Additional query params', [], 'Modules.Jpzdoublebanner.Admin'),
+                        'name' => self::B1_QUERY_PARAMS,
+                        'lang' => true,
+                        'desc' => $this->trans('Add eventual additional query params.', [], 'Modules.Jpzdoublebanner.Admin'),
+                    ],
+
                     // Banner 2
                     [
                         'type' => 'html',
@@ -248,6 +264,14 @@ class Jpz_DoubleBanner extends Module
                             ]
                         ],
                     ],
+                    [
+                        'type' => 'text',
+                        'label' => $this->trans('Additional query params', [], 'Modules.Jpzdoublebanner.Admin'),
+                        'name' => self::B2_QUERY_PARAMS,
+                        'lang' => true,
+                        'desc' => $this->trans('Add eventual additional query params.', [], 'Modules.Jpzdoublebanner.Admin'),
+                    ],
+
                 ],
                 'submit' => [
                     'title' => $this->trans('Salva', [], 'Admin.Actions'),
@@ -268,6 +292,7 @@ class Jpz_DoubleBanner extends Module
         $values[self::B1_IMAGE] = Configuration::get(self::B1_IMAGE); // Non lo usiamo per il file input, ma serve per il postProcess
         foreach ($languages as $lang) {
             $values[self::B1_TEXT][$lang['id_lang']] = Configuration::get(self::B1_TEXT, $lang['id_lang']);
+            $values[self::B1_QUERY_PARAMS][$lang['id_lang']] = Configuration::get(self::B1_QUERY_PARAMS, $lang['id_lang']);
         }
         $values[self::B1_CATEGORY] = Configuration::get(self::B1_CATEGORY);
 
@@ -275,6 +300,7 @@ class Jpz_DoubleBanner extends Module
         $values[self::B2_IMAGE] = Configuration::get(self::B2_IMAGE);
         foreach ($languages as $lang) {
             $values[self::B2_TEXT][$lang['id_lang']] = Configuration::get(self::B2_TEXT, $lang['id_lang']);
+            $values[self::B2_QUERY_PARAMS][$lang['id_lang']] = Configuration::get(self::B2_QUERY_PARAMS, $lang['id_lang']);
         }
         $values[self::B2_CATEGORY] = Configuration::get(self::B2_CATEGORY);
 
@@ -299,7 +325,9 @@ class Jpz_DoubleBanner extends Module
         $text_b2 = [];
         foreach ($languages as $lang) {
             $text_b1[$lang['id_lang']] = Tools::getValue(self::B1_TEXT . '_' . $lang['id_lang']);
+            $qp_b1[$lang['id_lang']] = Tools::getValue(self::B1_QUERY_PARAMS . '_' . $lang['id_lang']);
             $text_b2[$lang['id_lang']] = Tools::getValue(self::B2_TEXT . '_' . $lang['id_lang']);
+            $qp_b2[$lang['id_lang']] = Tools::getValue(self::B2_QUERY_PARAMS . '_' . $lang['id_lang']);
         }
         Configuration::updateValue(self::B1_TEXT, $text_b1, true); // true per permettere HTML
         Configuration::updateValue(self::B2_TEXT, $text_b2, true);
@@ -307,6 +335,9 @@ class Jpz_DoubleBanner extends Module
         // Salvataggio Categorie
         Configuration::updateValue(self::B1_CATEGORY, (int)Tools::getValue(self::B1_CATEGORY));
         Configuration::updateValue(self::B2_CATEGORY, (int)Tools::getValue(self::B2_CATEGORY));
+
+        Configuration::updateValue(self::B1_QUERY_PARAMS, $qp_b1); // true per permettere HTML
+        Configuration::updateValue(self::B2_QUERY_PARAMS, $qp_b2);
 
         if (count($errors)) {
             return $this->displayError(implode('<br />', $errors));
@@ -374,6 +405,7 @@ class Jpz_DoubleBanner extends Module
 
         $img_b1 = Configuration::get(self::B1_IMAGE);
         $text_b1 = Configuration::get(self::B1_TEXT, $id_lang);
+        $qp1 = (string)Configuration::get(self::B1_QUERY_PARAMS, $id_lang);
         $cat_id_b1 = (int)Configuration::get(self::B1_CATEGORY);
         $cat_link_b1 = '';
         $cat_name_b1 = '';
@@ -381,7 +413,11 @@ class Jpz_DoubleBanner extends Module
         if ($cat_id_b1 > 0) {
             $category1 = new Category($cat_id_b1, $id_lang);
             if (Validate::isLoadedObject($category1)) {
-                $cat_link_b1 = $this->context->link->getCategoryLink($category1);
+                $request = Request::create($this->context->link->getCategoryLink($category1));
+                parse_str($qp1, $qpArr);
+                $request->query->add($qpArr);
+
+                $cat_link_b1 = $request->getUri();
                 $cat_name_b1 = $category1->name;
             }
         }
@@ -400,11 +436,15 @@ class Jpz_DoubleBanner extends Module
         $cat_id_b2 = (int)Configuration::get(self::B2_CATEGORY);
         $cat_link_b2 = '';
         $cat_name_b2 = '';
+        $qp2 = (string)Configuration::get(self::B2_QUERY_PARAMS, $id_lang);
 
         if ($cat_id_b2 > 0) {
             $category2 = new Category($cat_id_b2, $id_lang);
             if (Validate::isLoadedObject($category2)) {
-                $cat_link_b2 = $this->context->link->getCategoryLink($category2);
+                $request = Request::create($this->context->link->getCategoryLink($category1));
+                parse_str($qp1, $qpArr);
+                $request->query->add($qpArr);
+                $cat_link_b2 = $request->getUri();
                 $cat_name_b2 = $category2->name;
             }
         }
@@ -424,6 +464,7 @@ class Jpz_DoubleBanner extends Module
         }
 
         $this->context->smarty->assign('banners', $banners_data);
+
         return $this->display(__FILE__, 'views/templates/hook/displayHome.tpl');
     }
 
