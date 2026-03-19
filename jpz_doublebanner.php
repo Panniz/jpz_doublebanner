@@ -3,6 +3,12 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+if(!file_exists(__DIR__ . '/vendor/autoload.php')){
+    return;
+}
+
+require_once __DIR__ . '/vendor/autoload.php';
+
 use League\Uri\Modifier;
 
 class Jpz_DoubleBanner extends Module
@@ -13,7 +19,7 @@ class Jpz_DoubleBanner extends Module
 
     public const CONFIG_PREFIX = 'JPZ_DOUBLEBANNER_';
 
-    // Config keys for Banner 1
+    // Config keys for Banner 1z
     public const B1_IMAGE = self::CONFIG_PREFIX . 'B1_IMAGE';
     public const B1_TEXT = self::CONFIG_PREFIX . 'B1_TEXT';
     public const B1_CATEGORY = self::CONFIG_PREFIX . 'B1_CATEGORY';
