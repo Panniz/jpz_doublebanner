@@ -3,7 +3,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-use Symfony\Component\HttpFoundation\Request;
+use League\Uri\Modifier;
 
 class Jpz_DoubleBanner extends Module
 {
@@ -176,7 +176,6 @@ class Jpz_DoubleBanner extends Module
                 $this->trans('Immagine attuale: %s', [$current_image_b2], 'Modules.Jpzdoublebanner.Admin');
         }
 
-
         return [
             'form' => [
                 'legend' => [
@@ -313,7 +312,6 @@ class Jpz_DoubleBanner extends Module
     protected function postProcess(): string
     {
         $errors = [];
-        $form_values = $this->getConfigFormValues(); // Per ottenere i valori esistenti delle immagini
         $languages = Language::getLanguages(false);
 
         // Gestione Upload Immagini
@@ -325,9 +323,9 @@ class Jpz_DoubleBanner extends Module
         $text_b2 = [];
         foreach ($languages as $lang) {
             $text_b1[$lang['id_lang']] = Tools::getValue(self::B1_TEXT . '_' . $lang['id_lang']);
-            $qp_b1[$lang['id_lang']] = Tools::getValue(self::B1_QUERY_PARAMS . '_' . $lang['id_lang']);
+            $qp_b1[$lang['id_lang']] = ltrim( Tools::getValue(self::B1_QUERY_PARAMS . '_' . $lang['id_lang']), '?');
             $text_b2[$lang['id_lang']] = Tools::getValue(self::B2_TEXT . '_' . $lang['id_lang']);
-            $qp_b2[$lang['id_lang']] = Tools::getValue(self::B2_QUERY_PARAMS . '_' . $lang['id_lang']);
+            $qp_b2[$lang['id_lang']] = ltrim( Tools::getValue(self::B2_QUERY_PARAMS . '_' . $lang['id_lang']), '?');
         }
         Configuration::updateValue(self::B1_TEXT, $text_b1, true); // true per permettere HTML
         Configuration::updateValue(self::B2_TEXT, $text_b2, true);
@@ -405,7 +403,7 @@ class Jpz_DoubleBanner extends Module
 
         $img_b1 = Configuration::get(self::B1_IMAGE);
         $text_b1 = Configuration::get(self::B1_TEXT, $id_lang);
-        $qp1 = (string)Configuration::get(self::B1_QUERY_PARAMS, $id_lang);
+        $qp1 = str_replace('/', '\/', trim((string)Configuration::get(self::B1_QUERY_PARAMS, $id_lang)));
         $cat_id_b1 = (int)Configuration::get(self::B1_CATEGORY);
         $cat_link_b1 = '';
         $cat_name_b1 = '';
@@ -413,11 +411,10 @@ class Jpz_DoubleBanner extends Module
         if ($cat_id_b1 > 0) {
             $category1 = new Category($cat_id_b1, $id_lang);
             if (Validate::isLoadedObject($category1)) {
-                $request = Request::create($this->context->link->getCategoryLink($category1));
-                parse_str($qp1, $qpArr);
-                $request->query->add($qpArr);
+                $catUri = Modifier::wrap($this->context->link->getCategoryLink($category1))
+                    ->appendQuery($qp1);
 
-                $cat_link_b1 = $request->getUri();
+                $cat_link_b1 = $catUri->toString();
                 $cat_name_b1 = $category1->name;
             }
         }
@@ -436,15 +433,17 @@ class Jpz_DoubleBanner extends Module
         $cat_id_b2 = (int)Configuration::get(self::B2_CATEGORY);
         $cat_link_b2 = '';
         $cat_name_b2 = '';
-        $qp2 = (string)Configuration::get(self::B2_QUERY_PARAMS, $id_lang);
+        $qp2 = str_replace('/', '\/', trim((string)Configuration::get(self::B2_QUERY_PARAMS, $id_lang)));
 
         if ($cat_id_b2 > 0) {
             $category2 = new Category($cat_id_b2, $id_lang);
             if (Validate::isLoadedObject($category2)) {
-                $request = Request::create($this->context->link->getCategoryLink($category1));
-                parse_str($qp1, $qpArr);
-                $request->query->add($qpArr);
-                $cat_link_b2 = $request->getUri();
+                $catUri = Modifier::wrap($this->context->link->getCategoryLink($category2))
+                    ->appendQuery($qp2);
+
+                $cat_link_b1 = (string)$catUri;
+
+                $cat_link_b2 = $catUri->toString();
                 $cat_name_b2 = $category2->name;
             }
         }
