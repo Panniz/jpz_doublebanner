@@ -10,5 +10,8 @@
     ],
     "require": {
         "league/uri-components": "^7.8"
+    },
+    "config": {
+        "prepend-autoloader": false
     }
 }
