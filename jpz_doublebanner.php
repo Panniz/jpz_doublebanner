@@ -13,9 +13,8 @@ use League\Uri\Modifier;
 
 class Jpz_DoubleBanner extends Module
 {
-    protected $config_form = false;
-    protected $upload_dir_path;
-    protected $upload_dir_url;
+    protected string $upload_dir_path;
+    protected string $upload_dir_url;
 
     public const CONFIG_PREFIX = 'JPZ_DOUBLEBANNER_';
 
