@@ -1,0 +1,39 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+    public: false
+
+  Jpz\DoubleBanner\Image\BannerImageStorage: ~
+
+  Jpz\DoubleBanner\Form\CategoryChoiceProvider: ~
+
+  Jpz\DoubleBanner\Form\BannerType: ~
+
+  Jpz\DoubleBanner\Form\BannerConfigurationType: ~
+
+  Jpz\DoubleBanner\Form\BannerConfigurationDataConfiguration:
+    arguments:
+      $configuration: '@prestashop.adapter.legacy.configuration'
+
+  jpz_doublebanner.form.configuration_data_provider:
+    class: Jpz\DoubleBanner\Form\BannerConfigurationFormDataProvider
+    arguments:
+      - '@Jpz\DoubleBanner\Form\BannerConfigurationDataConfiguration'
+
+  jpz_doublebanner.form.configuration_handler:
+    class: PrestaShop\PrestaShop\Core\Form\Handler
+    public: true
+    autowire: false
+    autoconfigure: false
+    arguments:
+      - '@form.factory'
+      - '@prestashop.core.hook.dispatcher'
+      - '@jpz_doublebanner.form.configuration_data_provider'
+      - 'Jpz\DoubleBanner\Form\BannerConfigurationType'
+      - 'JpzDoubleBannerConfiguration'
+
+  Jpz\DoubleBanner\Controller\Admin\ConfigurationController:
+    public: true
+    tags:
+      - 'controller.service_arguments'

@@ -1,0 +1,7 @@
+jpz_doublebanner_configuration:
+  path: /jpz/doublebanner/configuration
+  methods: [GET, POST]
+  defaults:
+    _controller: Jpz\DoubleBanner\Controller\Admin\ConfigurationController::index
+    _legacy_controller: AdminJpzDoubleBannerConfiguration
+    _legacy_link: AdminJpzDoubleBannerConfiguration
