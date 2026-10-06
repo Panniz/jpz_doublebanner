@@ -72,6 +72,8 @@ class Jpz_DoubleBanner extends Module
 
     public function hookDisplayHome(array $params): string
     {
+        $this->context->controller->registerStylesheet('jpz-doublebanner', 'modules/' . $this->name . '/views/css/front.css');
+
         $presenter = new BannerPresenter(new BannerImageStorage(), $this->context->link);
         $banners = $presenter->present((int) $this->context->language->id);
 

@@ -1,37 +1,23 @@
-{if isset($banners) && !empty($banners)}
-    {assign var="bannerCount" value=count($banners)}
-    <div id="jpzdoublebanner__container" class="row">
+{if !empty($banners)}
+    <section class="doublebanner full">
         {foreach from=$banners item=banner}
-            <div class="jpzdoublebanner__banner col-xs-12 {if $bannerCount>1}col-md-6{else}col-md-12{/if}">
-                {if $banner.category_link}
-                    <a href="{$banner.category_link|escape:'htmlall':'UTF-8'}">
-                {/if}
-
+            <div class="doublebanner__banner">
                 {if $banner.image}
                     {include file='module:jpz_doublebanner/views/templates/hook/_picture.tpl'
                         image=$banner.image
-                        alt={l s='Banner' d='Modules.Jpzdoublebanner.Front'}
-                        class='img-responsive'}
+                        alt=$banner.category_name|default:{l s='Banner' d='Modules.Jpzdoublebanner.Front'}}
                 {/if}
 
                 {if $banner.category_link}
-                    </a>
-                {/if}
-
-                {if $banner.text}
-                    <div class="banner-text">
+                    <a href="{$banner.category_link|escape:'htmlall':'UTF-8'}" class="doublebanner__content">
                         {$banner.text nofilter}
-                    </div>
-                {/if}
-
-                {if $banner.category_link && $banner.category_name}
-                    <div class="jpzdoublebanner__category-link">
-                        <a href="{$banner.category_link|escape:'htmlall':'UTF-8'}">
-                            {l s='Discover More on' d='Modules.Jpzdoublebanner.Front'} {$banner.category_name|escape:'htmlall':'UTF-8'}
-                        </a>
+                    </a>
+                {else}
+                    <div class="doublebanner__content">
+                        {$banner.text nofilter}
                     </div>
                 {/if}
             </div>
         {/foreach}
-    </div>
+    </section>
 {/if}
