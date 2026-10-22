@@ -2,7 +2,7 @@
 <module>
     <name>jpz_doublebanner</name>
     <displayName><![CDATA[Double Banner]]></displayName>
-    <version><![CDATA[2.0.0]]></version>
+    <version><![CDATA[2.0.1]]></version>
     <description><![CDATA[Adds two customizable banners to homepage with image, text and category link.]]></description>
     <author><![CDATA[Jacopo Zane]]></author>
     <tab><![CDATA[front_office_features]]></tab>

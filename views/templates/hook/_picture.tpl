@@ -1,7 +1,8 @@
 {**
  * Immagine di un banner: <picture> con la variante mobile come <source>, se c'è.
  *
- * Parametri: $image (banner.image), $alt, $loading (default "lazy").
+ * Parametri: $image (banner.image), $alt, $loading (default "lazy"),
+ * $fetchpriority (facoltativo, es. "high" per l'immagine LCP).
  *}
 {if !isset($loading)}{assign var=loading value='lazy'}{/if}
 <picture>
@@ -18,6 +19,7 @@
     alt="{$alt|escape:'htmlall':'UTF-8'}"
     loading="{$loading|escape:'htmlall':'UTF-8'}"
     decoding="async"
+    {if !empty($fetchpriority)}fetchpriority="{$fetchpriority|escape:'htmlall':'UTF-8'}"{/if}
     {if isset($class)}class="{$class|escape:'htmlall':'UTF-8'}"{/if}
   >
 </picture>
